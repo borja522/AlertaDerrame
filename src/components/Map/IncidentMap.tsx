@@ -32,22 +32,22 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
   const pickMarkerRef = useRef<L.Marker | null>(null);
   const baseTileLayerRef = useRef<L.TileLayer | null>(null);
 
-  const [mapStyle, setMapStyle] = useState<'carto' | 'satellite' | 'osm'>('carto');
+  const [mapStyle, setMapStyle] = useState<'osm' | 'satellite' | 'topo'>('osm');
   const [showRadius, setShowRadius] = useState<boolean>(true);
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Tile layers definition
+  // Tile layers definition (Free layers without API key watermarks)
   const tileURLs = {
-    carto: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    topo: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
   };
 
   const tileAttributions = {
-    carto: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
+    osm: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     satellite: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    osm: '&copy; OpenStreetMap contributors'
+    topo: 'Tiles &copy; Esri &mdash; Sources: USGS, Esri, TANA, DeLorme, TomTom'
   };
 
   // Initialize Map
@@ -334,19 +334,19 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
         {/* Style Switcher */}
         <div className="glass-panel p-1.5 rounded-xl flex items-center gap-1 shadow-lg border border-slate-700/60">
           <button
-            title="Vista Urbana / Voyager"
-            onClick={() => setMapStyle('carto')}
+            title="Vista Urbana / Calles (OpenStreetMap)"
+            onClick={() => setMapStyle('osm')}
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-              mapStyle === 'carto'
+              mapStyle === 'osm'
                 ? 'bg-emerald-600 text-white shadow'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Claro</span>
+            <span className="hidden sm:inline">Calles</span>
           </button>
           <button
-            title="Vista Satelital Satelital de Alta Resolución"
+            title="Vista Satelital de Alta Resolución"
             onClick={() => setMapStyle('satellite')}
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
               mapStyle === 'satellite'
@@ -358,15 +358,15 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
             <span className="hidden sm:inline">Satélite</span>
           </button>
           <button
-            title="Vista Estándar OpenStreetMap"
-            onClick={() => setMapStyle('osm')}
+            title="Vista Topográfica y Relieve"
+            onClick={() => setMapStyle('topo')}
             className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-              mapStyle === 'osm'
+              mapStyle === 'topo'
                 ? 'bg-emerald-600 text-white shadow'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
             }`}
           >
-            <span className="text-[11px] font-mono">OSM</span>
+            <span className="text-[11px] font-mono">Relieve</span>
           </button>
         </div>
 
