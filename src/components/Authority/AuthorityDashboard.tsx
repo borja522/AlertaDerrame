@@ -40,7 +40,12 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
   const [filterCategory, setFilterCategory] = useState<IncidentCategory | 'all'>('all');
   const [filterSeverity, setFilterSeverity] = useState<IncidentSeverity | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<IncidentStatus | 'all'>('all');
-
+const handleClearFilters = () => {
+  setSearchTerm('');
+  setFilterCategory('all');
+  setFilterSeverity('all');
+  setFilterStatus('all');
+};
   // Filtered list
   const filteredIncidents = incidents.filter((inc) => {
     const matchesSearch = 
@@ -236,6 +241,13 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
             <option value="containment_active">Contención Activa</option>
             <option value="resolved">Remediado</option>
           </select>
+           <button
+  type="button"
+  onClick={handleClearFilters}
+  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors"
+>
+  Limpiar filtros
+</button>
 
           <span className="text-[11px] text-slate-500 ml-auto font-mono">
             Mostrando {filteredIncidents.length} de {incidents.length} incidentes
