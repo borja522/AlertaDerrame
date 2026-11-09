@@ -31,6 +31,7 @@ interface IncidentDetailModalProps {
 export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   incident,
   onClose,
+  onUpdateStatus,
   onAddComment
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
