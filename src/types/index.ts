@@ -67,14 +67,55 @@ export interface Incident {
   updates: IncidentUpdate[];
 }
 
+export type AuthorityCategory = 
+  | 'environmental' // Autoridades Ambientales y Licenciamiento
+  | 'emergency'     // Cuerpos de Bomberos, Defensa Civil, Cruz Roja, HAZMAT
+  | 'police'        // Policía Nacional, Policía Ambiental (DIJIN / Carabineros)
+  | 'health'        // Salud, Centros Toxicológicos y Hospitales
+  | 'maritime';     // Guardacostas y DIMAR
+
 export interface EnvironmentalAuthority {
   id: string;
   name: string;
   acronym: string;
   type: 'national' | 'regional' | 'maritime' | 'emergency';
+  category: AuthorityCategory;
   coverageDescription: string;
   emergencyHotline: string;
+  directPhone?: string;
+  address?: string;
+  city?: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  website?: string;
   categoriesHandled: IncidentCategory[];
+  availableHours?: string;
+}
+
+export interface ProtocolStep {
+  stepNumber: number;
+  title: string;
+  description: string;
+  criticalWarning?: string;
+  responsibleRole?: string;
+}
+
+export interface ActionProtocol {
+  id: string;
+  category: IncidentCategory;
+  title: string;
+  shortTitle: string;
+  framework: string; // Marco normativo (Ley, Decreto)
+  objective: string;
+  activationCode: string;
+  severityFocus: IncidentSeverity[];
+  steps: ProtocolStep[];
+  emergencyContacts: string[];
+  equipmentNeeded: string[];
+  containmentChecklist: string[];
+  downloadableGuideName?: string;
 }
 
 export type IncidentSortOption = 
