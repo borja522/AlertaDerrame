@@ -30,3 +30,4 @@ describe('Formatters Utilities (formatters.ts)', () => {
     assert.strictEqual(sanitizePhoneNumber('01 8000 112 998'), '018000112998');
   });
 });
+

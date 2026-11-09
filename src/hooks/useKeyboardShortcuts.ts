@@ -64,3 +64,4 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
     };
   }, [handlers]);
 }
+
