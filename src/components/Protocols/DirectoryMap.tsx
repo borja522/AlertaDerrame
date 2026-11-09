@@ -313,13 +313,23 @@ export const DirectoryMap: React.FC<DirectoryMapProps> = ({
       )}
 
       {/* Legend Map Helper (Bottom Right) */}
-      <div className="hidden md:flex absolute bottom-4 right-4 z-10 glass-panel p-2.5 rounded-xl border border-slate-800/90 items-center gap-3 text-[10px] text-slate-400">
-        <span className="font-bold text-slate-300">Simbología:</span>
-        <span className="flex items-center gap-1">🚒 Bomberos</span>
-        <span className="flex items-center gap-1">👮 Policía</span>
-        <span className="flex items-center gap-1">🌿 Ambiental</span>
-        <span className="flex items-center gap-1">⚓ DIMAR</span>
-        <span className="flex items-center gap-1">🏥 Salud</span>
+      <div className="hidden md:flex absolute bottom-4 right-4 z-10 glass-panel p-2.5 px-3 rounded-xl border border-slate-800/90 items-center gap-3 text-[11px] text-slate-300 shadow-xl backdrop-blur-md bg-slate-950/85">
+        <span className="font-bold text-slate-200 uppercase tracking-wider text-[10px]">Simbología:</span>
+        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 font-medium">
+          🚒 Bomberos
+        </span>
+        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-medium">
+          👮 Policía
+        </span>
+        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium">
+          🌿 Ambiental
+        </span>
+        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-300 font-medium">
+          ⚓ DIMAR
+        </span>
+        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 font-medium">
+          🏥 Salud
+        </span>
       </div>
     </div>
   );
