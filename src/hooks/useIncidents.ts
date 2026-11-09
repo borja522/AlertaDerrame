@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { 
   Incident, 
   IncidentCategory, 
@@ -41,7 +41,7 @@ export interface UseIncidentsReturn {
 }
 
 export function useIncidents(): UseIncidentsReturn {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>(() => incidentService.getIncidents());
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   // Filters & Sorting state
@@ -52,12 +52,6 @@ export function useIncidents(): UseIncidentsReturn {
   const [sortBy, setSortBy] = useState<IncidentSortOption>('newest');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 250);
-
-  // Initial load
-  useEffect(() => {
-    const loaded = incidentService.getIncidents();
-    setIncidents(loaded);
-  }, []);
 
   // Compute filtered & sorted list
   const filteredIncidents = useMemo(() => {
@@ -192,4 +186,3 @@ export function useIncidents(): UseIncidentsReturn {
     criticalCount,
   };
 }
-

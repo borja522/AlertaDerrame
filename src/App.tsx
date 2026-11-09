@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Incident, IncidentCategory, IncidentSeverity, IncidentStatus } from './types';
+import type { Incident, IncidentStatus } from './types';
 import { Navbar } from './components/Navigation/Navbar';
 import { IncidentMap } from './components/Map/IncidentMap';
 import { IncidentDetailModal } from './components/IncidentDetail/IncidentDetailModal';

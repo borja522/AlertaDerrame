@@ -2,9 +2,7 @@ import {
   Incident, 
   IncidentFilterCriteria, 
   IncidentSortOption, 
-  IncidentStatistics, 
-  IncidentStatus, 
-  IncidentUpdate 
+  IncidentStatistics 
 } from '../types';
 import { INITIAL_MOCK_INCIDENTS } from '../data/mockIncidents';
 import { APP_CONFIG, SEVERITY_WEIGHTS } from '../constants';
@@ -185,4 +183,3 @@ class IncidentService {
 }
 
 export const incidentService = new IncidentService();
-
