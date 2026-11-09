@@ -86,3 +86,4 @@ export const COLOMBIAN_DEPARTMENTS: string[] = [
   'Vichada',
   'San Andrés y Providencia'
 ];
+

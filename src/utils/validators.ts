@@ -59,3 +59,4 @@ export function validateIncidentForm(data: IncidentFormData): ValidationResult {
     errors,
   };
 }
+

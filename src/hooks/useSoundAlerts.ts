@@ -46,3 +46,4 @@ export function useSoundAlerts(): UseSoundAlertsReturn {
     playBeep,
   };
 }
+

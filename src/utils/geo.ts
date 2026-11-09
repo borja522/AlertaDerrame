@@ -97,3 +97,4 @@ export function getGeometricCenter(locations: LocationInfo[]): { lat: number; ln
     lng: total.lng / valid.length,
   };
 }
+

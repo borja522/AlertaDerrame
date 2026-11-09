@@ -124,3 +124,4 @@ ${(incident.updates || []).map((u, i) => `[${i + 1}] ${formatCompactDateTime(u.t
 Generado automáticamente por el Sistema de Alerta Temprana EcoAlerta.
 `;
 }
+

@@ -96,3 +96,4 @@ export function generateIncidentFolio(prefix = 'ECO'): string {
 export function sanitizePhoneNumber(phone: string): string {
   return phone.replace(/[^\d+]/g, '');
 }
+

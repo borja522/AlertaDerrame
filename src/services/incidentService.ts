@@ -185,3 +185,4 @@ class IncidentService {
 }
 
 export const incidentService = new IncidentService();
+

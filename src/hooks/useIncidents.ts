@@ -192,3 +192,4 @@ export function useIncidents(): UseIncidentsReturn {
     criticalCount,
   };
 }
+
