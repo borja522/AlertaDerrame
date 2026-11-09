@@ -76,3 +76,42 @@ export interface EnvironmentalAuthority {
   emergencyHotline: string;
   categoriesHandled: IncidentCategory[];
 }
+
+export type IncidentSortOption = 
+  | 'newest' 
+  | 'oldest' 
+  | 'severity_desc' 
+  | 'radius_desc' 
+  | 'title_asc';
+
+export interface IncidentFilterCriteria {
+  searchTerm?: string;
+  category?: IncidentCategory | 'all';
+  severity?: IncidentSeverity | 'all';
+  status?: IncidentStatus | 'all';
+  municipality?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface IncidentStatistics {
+  totalIncidents: number;
+  activeCritical: number;
+  containmentActive: number;
+  resolvedCount: number;
+  totalAffectedRadiusKm: number;
+  byCategory: Record<IncidentCategory, number>;
+  bySeverity: Record<IncidentSeverity, number>;
+  byStatus: Record<IncidentStatus, number>;
+}
+
+export interface CoordinatesDMS {
+  latDMS: string;
+  lngDMS: string;
+}
+
+export interface ExportOptions {
+  filename?: string;
+  includeUpdates?: boolean;
+  format?: 'csv' | 'json';
+}

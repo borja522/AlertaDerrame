@@ -1,6 +1,31 @@
 // Web Audio API Synthesizer for alerts and alarms
+import { APP_CONFIG } from '../constants';
 
 let audioCtx: AudioContext | null = null;
+let isSoundMuted = false;
+
+// Check stored mute preference
+try {
+  const savedMute = localStorage.getItem(APP_CONFIG.STORAGE_KEY_SOUND_MUTED);
+  if (savedMute !== null) {
+    isSoundMuted = JSON.parse(savedMute);
+  }
+} catch {
+  isSoundMuted = false;
+}
+
+export function setSoundMuted(muted: boolean): void {
+  isSoundMuted = muted;
+  try {
+    localStorage.setItem(APP_CONFIG.STORAGE_KEY_SOUND_MUTED, JSON.stringify(muted));
+  } catch {
+    // ignore
+  }
+}
+
+export function getSoundMuted(): boolean {
+  return isSoundMuted;
+}
 
 function getAudioContext(): AudioContext {
   if (!audioCtx) {
@@ -14,6 +39,7 @@ function getAudioContext(): AudioContext {
 }
 
 export function playEmergencySirenSound() {
+  if (isSoundMuted) return;
   try {
     const ctx = getAudioContext();
     const osc = ctx.createOscillator();
@@ -43,6 +69,7 @@ export function playEmergencySirenSound() {
 }
 
 export function playSuccessChime() {
+  if (isSoundMuted) return;
   try {
     const ctx = getAudioContext();
     const now = ctx.currentTime;
@@ -66,5 +93,30 @@ export function playSuccessChime() {
     });
   } catch (err) {
     console.warn('Audio chime warning:', err);
+  }
+}
+
+export function playInfoBeep() {
+  if (isSoundMuted) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(900, now + 0.12);
+
+    gain.gain.setValueAtTime(0.06, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.16);
+  } catch (err) {
+    console.warn('Audio beep error:', err);
   }
 }

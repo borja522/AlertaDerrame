@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { Incident, IncidentCategory, IncidentSeverity, IncidentStatus } from './types';
-import { loadStoredIncidents, saveIncidents, resetToDemoIncidents } from './utils/storage';
+import { useState, useCallback, useRef } from 'react';
+import type { Incident, IncidentStatus } from './types';
 import { Navbar } from './components/Navigation/Navbar';
 import { IncidentMap } from './components/Map/IncidentMap';
 import { IncidentDetailModal } from './components/IncidentDetail/IncidentDetailModal';
@@ -8,141 +7,136 @@ import { ReportIncidentModal } from './components/ReportModal/ReportIncidentModa
 import { AuthorityDashboard } from './components/Authority/AuthorityDashboard';
 import { ProtocolsDirectory } from './components/Protocols/ProtocolsDirectory';
 import { CATEGORY_METADATA } from './data/authorities';
+import { useIncidents } from './hooks/useIncidents';
+import { useSoundAlerts } from './hooks/useSoundAlerts';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { auditService } from './services/auditService';
+import { formatRadius } from './utils/formatters';
+import { SORT_OPTIONS, APP_CONFIG } from './constants';
 import { 
+  ArrowUpDown,
   ChevronRight, 
   Crosshair, 
+  Download,
   Filter, 
   MapPin, 
   Plus, 
   Radio, 
-  RotateCcw 
+  RotateCcw,
+  Search,
+  WifiOff,
+  X
 } from 'lucide-react';
 
 export function App() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const {
+    incidents,
+    filteredIncidents,
+    selectedIncident,
+    setSelectedIncident,
+    searchTerm,
+    setSearchTerm,
+    categoryFilter,
+    setCategoryFilter,
+    severityFilter,
+    setSeverityFilter,
+    sortBy,
+    setSortBy,
+    createIncident,
+    updateStatus,
+    addComment,
+    resetDemo,
+    exportCSV,
+    criticalCount,
+  } = useIncidents();
+
+  const { isMuted, toggleMute, playSuccess } = useSoundAlerts();
+  const networkStatus = useNetworkStatus();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Navigation & Modals
   const [currentView, setCurrentView] = useState<'map' | 'dashboard' | 'protocols'>('map');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Map picking state
   const [isPickingLocation, setIsPickingLocation] = useState(false);
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Map feed filters
-  const [mapCategoryFilter, setMapCategoryFilter] = useState<IncidentCategory | 'all'>('all');
-  const [mapSeverityFilter, setMapSeverityFilter] = useState<IncidentSeverity | 'all'>('all');
-
   // Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Load from local storage on mount
-  useEffect(() => {
-    const data = loadStoredIncidents();
-    setIncidents(data);
-  }, []);
-
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
-    }, 4500);
-  };
+    }, APP_CONFIG.TOAST_DURATION_MS);
+  }, []);
 
-  // Add new incident
-  const handleCreateIncident = (newIncident: Incident) => {
-    const updated = [newIncident, ...incidents];
-    setIncidents(updated);
-    saveIncidents(updated);
+  // Keyboard shortcut handlers
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (selectedIncident) setSelectedIncident(null);
+      if (isReportModalOpen) setIsReportModalOpen(false);
+      if (isPickingLocation) setIsPickingLocation(false);
+    },
+    onMapView: () => setCurrentView('map'),
+    onDashboardView: () => setCurrentView('dashboard'),
+    onProtocolsView: () => setCurrentView('protocols'),
+    onFocusSearch: () => {
+      if (currentView === 'map' && searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    },
+    onToggleMute: toggleMute,
+  });
+
+  // Wrap incident creation with audio chime, audit & toast
+  const handleCreateIncident = useCallback((newIncident: Incident) => {
+    createIncident(newIncident);
+    auditService.log('incident_created', `Alerta #${newIncident.folioNumber}: ${newIncident.title}`, newIncident.folioNumber);
     setIsPickingLocation(false);
     setPickedCoords(null);
+    playSuccess();
     showToast(`¡Alerta ambiental #${newIncident.folioNumber} transmitida a la autoridad con éxito!`);
-  };
+  }, [createIncident, playSuccess, showToast]);
 
-  // Update status
-  const handleUpdateStatus = (incidentId: string, newStatus: IncidentStatus, note: string) => {
-    const updated = incidents.map((inc) => {
-      if (inc.id === incidentId) {
-        const newUpdate = {
-          id: `upd-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          author: 'Despacho de Control Ambiental',
-          message: note || `Estado actualizado a ${newStatus}`,
-          newStatus
-        };
-        return {
-          ...inc,
-          status: newStatus,
-          updates: [newUpdate, ...(inc.updates || [])]
-        };
-      }
-      return inc;
-    });
-
-    setIncidents(updated);
-    saveIncidents(updated);
-
-    if (selectedIncident && selectedIncident.id === incidentId) {
-      const fresh = updated.find(i => i.id === incidentId);
-      if (fresh) setSelectedIncident(fresh);
-    }
-
+  const handleUpdateStatus = useCallback((incidentId: string, newStatus: IncidentStatus, note: string) => {
+    updateStatus(incidentId, newStatus, note);
+    auditService.log('status_changed', `Estado actualizado a ${newStatus}. ${note || ''}`, incidentId);
     showToast(`Estado del incidente actualizado a: ${newStatus}`);
-  };
+  }, [updateStatus, showToast]);
 
-  // Add comment / update note
-  const handleAddComment = (incidentId: string, author: string, message: string) => {
-    const updated = incidents.map((inc) => {
-      if (inc.id === incidentId) {
-        const newUpdate = {
-          id: `upd-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          author,
-          message
-        };
-        return {
-          ...inc,
-          updates: [...(inc.updates || []), newUpdate]
-        };
-      }
-      return inc;
-    });
-
-    setIncidents(updated);
-    saveIncidents(updated);
-
-    if (selectedIncident && selectedIncident.id === incidentId) {
-      const fresh = updated.find(i => i.id === incidentId);
-      if (fresh) setSelectedIncident(fresh);
-    }
-
+  const handleAddComment = useCallback((incidentId: string, author: string, message: string) => {
+    addComment(incidentId, author, message);
+    auditService.log('comment_added', `Anotación pericial por ${author}: ${message}`, incidentId);
     showToast('Anotación agregada a la bitácora pericial');
-  };
+  }, [addComment, showToast]);
 
   // Handle location picking from map
-  const handleMapLocationPicked = (lat: number, lng: number) => {
+  const handleMapLocationPicked = useCallback((lat: number, lng: number) => {
     setPickedCoords({ lat, lng });
+    auditService.log('location_picked', `Coordenadas fijadas en mapa: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     if (isPickingLocation) {
       setIsPickingLocation(false);
       setIsReportModalOpen(true);
       showToast(`Punto fijado en GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     }
-  };
+  }, [isPickingLocation, showToast]);
 
-  const handleStartPickingLocation = () => {
+  const handleStartPickingLocation = useCallback(() => {
     setIsPickingLocation(true);
     setCurrentView('map');
-  };
+  }, []);
 
-  // Reset demo
-  const handleResetDemo = () => {
+  // Reset demo data
+  const handleResetDemo = useCallback(() => {
     if (window.confirm('¿Deseas restaurar los incidentes a la muestra inicial de demostración?')) {
-      const initial = resetToDemoIncidents();
-      setIncidents(initial);
+      resetDemo();
+      auditService.log('demo_reset', 'Datos restablecidos a la muestra base de prueba');
       showToast('Datos de demostración restablecidos.');
     }
-  };
-
-  const criticalCount = incidents.filter(i => i.severity === 'critical' && i.status !== 'resolved').length;
+  }, [resetDemo, showToast]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
@@ -165,7 +159,17 @@ export function App() {
         }}
         onOpenReportModal={() => setIsReportModalOpen(true)}
         activeCriticalCount={criticalCount}
+        isSoundMuted={isMuted}
+        onToggleSound={toggleMute}
       />
+
+      {/* Offline Connectivity Notification Banner */}
+      {!networkStatus.isOnline && (
+        <div className="bg-amber-950/80 border-b border-amber-500/40 px-4 py-1.5 text-xs text-amber-300 flex items-center justify-center gap-2">
+          <WifiOff className="w-3.5 h-3.5 text-amber-400" />
+          <span>Modo sin conexión: los cambios y reportes se conservan en la memoria local.</span>
+        </div>
+      )}
 
       {/* Critical Spill Emergency Notification Banner */}
       {criticalCount > 0 && (
@@ -181,7 +185,7 @@ export function App() {
             </div>
             <button
               onClick={() => {
-                setMapSeverityFilter('critical');
+                setSeverityFilter('critical');
                 setCurrentView('map');
               }}
               className="text-[11px] font-bold text-red-300 hover:text-white underline underline-offset-2 flex items-center gap-1"
@@ -228,9 +232,9 @@ export function App() {
                 </span>
 
                 <button
-                  onClick={() => setMapCategoryFilter('all')}
+                  onClick={() => setCategoryFilter('all')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                    mapCategoryFilter === 'all'
+                    categoryFilter === 'all'
                       ? 'bg-emerald-600 text-white shadow'
                       : 'bg-slate-900 text-slate-400 hover:text-white'
                   }`}
@@ -239,9 +243,9 @@ export function App() {
                 </button>
 
                 <button
-                  onClick={() => setMapCategoryFilter('oil_spill')}
+                  onClick={() => setCategoryFilter('oil_spill')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                    mapCategoryFilter === 'oil_spill'
+                    categoryFilter === 'oil_spill'
                       ? 'bg-amber-600 text-white shadow'
                       : 'bg-slate-900 text-slate-400 hover:text-white'
                   }`}
@@ -251,9 +255,9 @@ export function App() {
                 </button>
 
                 <button
-                  onClick={() => setMapCategoryFilter('deforestation')}
+                  onClick={() => setCategoryFilter('deforestation')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                    mapCategoryFilter === 'deforestation'
+                    categoryFilter === 'deforestation'
                       ? 'bg-emerald-600 text-white shadow'
                       : 'bg-slate-900 text-slate-400 hover:text-white'
                   }`}
@@ -263,9 +267,9 @@ export function App() {
                 </button>
 
                 <button
-                  onClick={() => setMapCategoryFilter('water_pollution')}
+                  onClick={() => setCategoryFilter('water_pollution')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                    mapCategoryFilter === 'water_pollution'
+                    categoryFilter === 'water_pollution'
                       ? 'bg-cyan-600 text-white shadow'
                       : 'bg-slate-900 text-slate-400 hover:text-white'
                   }`}
@@ -276,6 +280,15 @@ export function App() {
               </div>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={exportCSV}
+                  title="Exportar reportes a CSV"
+                  className="p-2 text-slate-400 hover:text-slate-200 bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors border border-slate-800 flex items-center gap-1 text-xs"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </button>
+
                 <button
                   onClick={handleResetDemo}
                   title="Restaurar datos de prueba"
@@ -299,41 +312,82 @@ export function App() {
                   isPickingLocation={isPickingLocation}
                   pickedLocation={pickedCoords}
                   onLocationPicked={handleMapLocationPicked}
-                  filterCategory={mapCategoryFilter}
-                  filterSeverity={mapSeverityFilter}
+                  filterCategory={categoryFilter}
+                  filterSeverity={severityFilter}
                 />
               </div>
 
               {/* Incidents Live Stream / Feed Column */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
-                      <span>Reportes Comunitarios</span>
-                    </h3>
-                    <p className="text-[11px] text-slate-400">
-                      Pines georreferenciados en tiempo real
-                    </p>
+              <div className="lg:col-span-4 space-y-3">
+                <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                        <span>Reportes Comunitarios</span>
+                      </h3>
+                      <p className="text-[11px] text-slate-400">
+                        {filteredIncidents.length} de {incidents.length} registros visibles
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsReportModalOpen(true)}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-md transition-all active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Reportar</span>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setIsReportModalOpen(true)}
-                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-md"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Reportar</span>
-                  </button>
+
+                  {/* Inline Search in Feed */}
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Buscar por título, folio o municipio... (presiona /)"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Sort Controls */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80">
+                    <span className="flex items-center gap-1">
+                      <ArrowUpDown className="w-3 h-3 text-emerald-400" />
+                      <span>Ordenar:</span>
+                    </span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-emerald-500"
+                    >
+                      {SORT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Scrollable incidents list */}
-                <div className="h-[480px] lg:h-[600px] overflow-y-auto space-y-3 pr-1">
-                  {incidents
-                    .filter(inc => {
-                      const matchCat = mapCategoryFilter === 'all' || inc.category === mapCategoryFilter;
-                      const matchSev = mapSeverityFilter === 'all' || inc.severity === mapSeverityFilter;
-                      return matchCat && matchSev;
-                    })
-                    .map((inc) => {
+                <div className="h-[430px] lg:h-[530px] overflow-y-auto space-y-3 pr-1">
+                  {filteredIncidents.length === 0 ? (
+                    <div className="glass-panel p-6 rounded-2xl border border-slate-800 text-center text-slate-400 text-xs">
+                      No se encontraron reportes con los criterios actuales.
+                    </div>
+                  ) : (
+                    filteredIncidents.map((inc) => {
                       const meta = CATEGORY_METADATA[inc.category];
                       const isSelected = selectedIncident?.id === inc.id;
 
@@ -375,13 +429,14 @@ export function App() {
                                 <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
                                 <span className="truncate">{inc.location.municipality || 'Barrancabermeja'}</span>
                                 <span>•</span>
-                                <span className="font-mono text-emerald-400 font-semibold">{(inc.affectedRadiusMeters / 1000).toFixed(1)} km</span>
+                                <span className="font-mono text-emerald-400 font-semibold">{formatRadius(inc.affectedRadiusMeters)}</span>
                               </div>
                             </div>
                           </div>
                         </div>
                       );
-                    })}
+                    })
+                  )}
                 </div>
               </div>
 

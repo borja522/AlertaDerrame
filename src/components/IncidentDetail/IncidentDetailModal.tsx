@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { Incident, IncidentStatus } from '../../types';
 import { CATEGORY_METADATA } from '../../data/authorities';
 import { 
-  AlertOctagon, 
-  Calendar, 
   CheckCircle2, 
   Clock, 
   Copy, 
-  Droplet, 
-  ExternalLink, 
+  Download, 
   Eye, 
   FileText, 
   MapPin, 
-  MessageSquare, 
   PhoneCall, 
   Send, 
   ShieldAlert, 
@@ -21,6 +17,9 @@ import {
   Waves, 
   X 
 } from 'lucide-react';
+import { formatFullDateTime, formatRelativeTime, formatRadius } from '../../utils/formatters';
+import { toDMS } from '../../utils/geo';
+import { generateIncidentTechnicalSheet, triggerFileDownload } from '../../utils/export';
 
 interface IncidentDetailModalProps {
   incident: Incident | null;
@@ -32,15 +31,13 @@ interface IncidentDetailModalProps {
 export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
   incident,
   onClose,
-  onUpdateStatus,
   onAddComment
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [copiedCoords, setCopiedCoords] = useState(false);
-  const [newStatus, setNewStatus] = useState<IncidentStatus>(incident?.status || 'reported');
-  const [statusNote, setStatusNote] = useState('');
+  const [copiedFolio, setCopiedFolio] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [commentAuthor, setCommentAuthor] = useState('Autoridad Ambiental CAS');
+  const [commentAuthor] = useState('Autoridad Ambiental CAS');
 
   if (!incident) return null;
 
@@ -53,12 +50,19 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
     setTimeout(() => setCopiedCoords(false), 2000);
   };
 
-  const handleApplyStatusChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onUpdateStatus && statusNote.trim()) {
-      onUpdateStatus(incident.id, newStatus, statusNote);
-      setStatusNote('');
-    }
+  const handleCopyFolio = () => {
+    navigator.clipboard.writeText(incident.folioNumber);
+    setCopiedFolio(true);
+    setTimeout(() => setCopiedFolio(false), 2000);
+  };
+
+  const handleDownloadSheet = () => {
+    const sheetText = generateIncidentTechnicalSheet(incident);
+    triggerFileDownload(
+      sheetText,
+      `ficha_tecnica_${incident.folioNumber}.txt`,
+      'text/plain;charset=utf-8'
+    );
   };
 
   const handlePostComment = (e: React.FormEvent) => {
@@ -76,6 +80,9 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
     containment_active: { label: 'Contención Activa', color: 'text-red-400', badge: 'bg-red-500/20 text-red-300 border-red-500/30 animate-pulse' },
     resolved: { label: 'Remediado y Cerrado', color: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' }
   };
+
+  const latDms = toDMS(incident.location.lat, true);
+  const lngDms = toDMS(incident.location.lng, false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-fadeIn">
@@ -97,17 +104,22 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               }`}>
                 Severidad: {incident.severity}
               </span>
-              <span className="font-mono text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                Folio: #{incident.folioNumber}
-              </span>
+              <button 
+                onClick={handleCopyFolio}
+                title="Haga clic para copiar el folio"
+                className="font-mono text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 transition-colors flex items-center gap-1"
+              >
+                <span>Folio: #{incident.folioNumber}</span>
+                {copiedFolio ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
+              </button>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
               {incident.title}
             </h2>
             <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5" title={formatFullDateTime(incident.createdAt)}>
                 <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                Reportado {new Date(incident.createdAt).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}
+                Reportado {formatRelativeTime(incident.createdAt)}
               </span>
               <span className="flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-sky-400" />
@@ -215,9 +227,11 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
               <div className="text-sm font-bold text-white">
                 {incident.location.address || 'Ubicación Georreferenciada'}, {incident.location.municipality}, {incident.location.department}
               </div>
-              <div className="text-xs font-mono text-emerald-400 mt-1 flex items-center gap-2">
-                <span>Lat: {incident.location.lat.toFixed(5)}°, Lng: {incident.location.lng.toFixed(5)}°</span>
-                <span>• Radio Afectación: {(incident.affectedRadiusMeters / 1000).toFixed(2)} km</span>
+              <div className="text-xs font-mono text-emerald-400 mt-1 flex flex-wrap items-center gap-2">
+                <span>Lat: {incident.location.lat.toFixed(5)}° ({latDms})</span>
+                <span>•</span>
+                <span>Lng: {incident.location.lng.toFixed(5)}° ({lngDms})</span>
+                <span>• Radio: {formatRadius(incident.affectedRadiusMeters)}</span>
               </div>
             </div>
             <button
@@ -266,8 +280,8 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
                   <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="font-bold text-emerald-400">{upd.author}</span>
-                      <span className="text-slate-400 font-mono text-[11px]">
-                        {new Date(upd.timestamp).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                      <span className="text-slate-400 font-mono text-[11px]" title={formatFullDateTime(upd.timestamp)}>
+                        {formatRelativeTime(upd.timestamp)}
                       </span>
                     </div>
                     <p className="text-slate-200 text-xs leading-relaxed">{upd.message}</p>
@@ -306,15 +320,22 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs text-slate-400">
-            Protocolo de Alerta Temprana • Ley Ambiental & Gestión del Riesgo
-          </div>
           <button
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-colors"
+            onClick={handleDownloadSheet}
+            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition-colors"
           >
-            Cerrar Expediente
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Descargar Ficha Técnica (.txt)</span>
           </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-colors"
+            >
+              Cerrar Expediente
+            </button>
+          </div>
         </div>
 
       </div>

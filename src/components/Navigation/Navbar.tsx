@@ -1,15 +1,13 @@
 import React from 'react';
 import { 
-  AlertTriangle, 
   BookOpen, 
-  LifeBuoy, 
   Map, 
   PhoneCall, 
   PlusCircle, 
   Radio, 
   ShieldCheck, 
-  Sparkles, 
-  Waves 
+  Volume2, 
+  VolumeX 
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -17,13 +15,17 @@ interface NavbarProps {
   onViewChange: (view: 'map' | 'dashboard' | 'protocols') => void;
   onOpenReportModal: () => void;
   activeCriticalCount: number;
+  isSoundMuted?: boolean;
+  onToggleSound?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentView,
   onViewChange,
   onOpenReportModal,
-  activeCriticalCount
+  activeCriticalCount,
+  isSoundMuted = false,
+  onToggleSound,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-8 py-3.5 transition-all">
@@ -99,8 +101,22 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Right Action: Report Button & Quick Hotline */}
-        <div className="flex items-center gap-2.5">
+        {/* Right Action: Report Button, Sound Toggle & Quick Hotline */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {onToggleSound && (
+            <button
+              onClick={onToggleSound}
+              title={isSoundMuted ? 'Activar alarmas sonoras' : 'Silenciar alarmas sonoras'}
+              className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl border border-slate-800 transition-colors flex items-center justify-center"
+            >
+              {isSoundMuted ? (
+                <VolumeX className="w-4 h-4 text-slate-500" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-emerald-400" />
+              )}
+            </button>
+          )}
+
           <a
             href="tel:123"
             title="Línea Única Nacional de Emergencias 123"
@@ -112,12 +128,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={onOpenReportModal}
-            className="group relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 shadow-xl shadow-emerald-950/50 active:scale-95 transition-all"
+            className="group relative inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 shadow-xl shadow-emerald-950/50 active:scale-95 transition-all"
           >
             <span className="absolute -inset-0.5 rounded-xl bg-emerald-500 opacity-30 blur-sm group-hover:opacity-75 transition duration-200"></span>
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center gap-1.5 sm:gap-2">
               <PlusCircle className="w-4 h-4 animate-spin-slow" />
-              <span>REPORTAR INCIDENTE</span>
+              <span className="hidden xs:inline">REPORTAR</span>
+              <span className="hidden sm:inline">INCIDENTE</span>
             </div>
           </button>
         </div>
