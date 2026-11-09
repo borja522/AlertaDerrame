@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Incident, IncidentStatus } from './types';
 import { Navbar } from './components/Navigation/Navbar';
 import { IncidentMap } from './components/Map/IncidentMap';
@@ -9,6 +9,9 @@ import { ProtocolsDirectory } from './components/Protocols/ProtocolsDirectory';
 import { CATEGORY_METADATA } from './data/authorities';
 import { useIncidents } from './hooks/useIncidents';
 import { useSoundAlerts } from './hooks/useSoundAlerts';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { auditService } from './services/auditService';
 import { formatRadius } from './utils/formatters';
 import { SORT_OPTIONS, APP_CONFIG } from './constants';
 import { 
@@ -22,6 +25,7 @@ import {
   Radio, 
   RotateCcw,
   Search,
+  WifiOff,
   X
 } from 'lucide-react';
 
@@ -48,6 +52,8 @@ export function App() {
   } = useIncidents();
 
   const { isMuted, toggleMute, playSuccess } = useSoundAlerts();
+  const networkStatus = useNetworkStatus();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Navigation & Modals
   const [currentView, setCurrentView] = useState<'map' | 'dashboard' | 'protocols'>('map');
@@ -67,9 +73,28 @@ export function App() {
     }, APP_CONFIG.TOAST_DURATION_MS);
   }, []);
 
-  // Wrap incident creation with audio chime & toast
+  // Keyboard shortcut handlers
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (selectedIncident) setSelectedIncident(null);
+      if (isReportModalOpen) setIsReportModalOpen(false);
+      if (isPickingLocation) setIsPickingLocation(false);
+    },
+    onMapView: () => setCurrentView('map'),
+    onDashboardView: () => setCurrentView('dashboard'),
+    onProtocolsView: () => setCurrentView('protocols'),
+    onFocusSearch: () => {
+      if (currentView === 'map' && searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    },
+    onToggleMute: toggleMute,
+  });
+
+  // Wrap incident creation with audio chime, audit & toast
   const handleCreateIncident = useCallback((newIncident: Incident) => {
     createIncident(newIncident);
+    auditService.log('incident_created', `Alerta #${newIncident.folioNumber}: ${newIncident.title}`, newIncident.folioNumber);
     setIsPickingLocation(false);
     setPickedCoords(null);
     playSuccess();
@@ -78,17 +103,20 @@ export function App() {
 
   const handleUpdateStatus = useCallback((incidentId: string, newStatus: IncidentStatus, note: string) => {
     updateStatus(incidentId, newStatus, note);
+    auditService.log('status_changed', `Estado actualizado a ${newStatus}. ${note || ''}`, incidentId);
     showToast(`Estado del incidente actualizado a: ${newStatus}`);
   }, [updateStatus, showToast]);
 
   const handleAddComment = useCallback((incidentId: string, author: string, message: string) => {
     addComment(incidentId, author, message);
+    auditService.log('comment_added', `Anotación pericial por ${author}: ${message}`, incidentId);
     showToast('Anotación agregada a la bitácora pericial');
   }, [addComment, showToast]);
 
   // Handle location picking from map
   const handleMapLocationPicked = useCallback((lat: number, lng: number) => {
     setPickedCoords({ lat, lng });
+    auditService.log('location_picked', `Coordenadas fijadas en mapa: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     if (isPickingLocation) {
       setIsPickingLocation(false);
       setIsReportModalOpen(true);
@@ -105,6 +133,7 @@ export function App() {
   const handleResetDemo = useCallback(() => {
     if (window.confirm('¿Deseas restaurar los incidentes a la muestra inicial de demostración?')) {
       resetDemo();
+      auditService.log('demo_reset', 'Datos restablecidos a la muestra base de prueba');
       showToast('Datos de demostración restablecidos.');
     }
   }, [resetDemo, showToast]);
@@ -133,6 +162,14 @@ export function App() {
         isSoundMuted={isMuted}
         onToggleSound={toggleMute}
       />
+
+      {/* Offline Connectivity Notification Banner */}
+      {!networkStatus.isOnline && (
+        <div className="bg-amber-950/80 border-b border-amber-500/40 px-4 py-1.5 text-xs text-amber-300 flex items-center justify-center gap-2">
+          <WifiOff className="w-3.5 h-3.5 text-amber-400" />
+          <span>Modo sin conexión: los cambios y reportes se conservan en la memoria local.</span>
+        </div>
+      )}
 
       {/* Critical Spill Emergency Notification Banner */}
       {criticalCount > 0 && (
@@ -306,8 +343,9 @@ export function App() {
                   <div className="relative">
                     <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
+                      ref={searchInputRef}
                       type="text"
-                      placeholder="Buscar por título, folio o municipio..."
+                      placeholder="Buscar por título, folio o municipio... (presiona /)"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
