@@ -175,27 +175,47 @@ export const IncidentMap: React.FC<IncidentMapProps> = ({
       });
 
       // HTML Popup with modern Tailwind design
+      const hasPhoto = inc.photos && inc.photos.length > 0;
       const popupHtml = `
         <div class="w-72 p-1 text-slate-100">
-          <div class="relative overflow-hidden rounded-lg mb-2.5">
-            <img src="${inc.photos[0] || 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=600&q=80'}" 
-                 alt="${inc.title}" 
-                 class="w-full h-28 object-cover rounded-lg brightness-90 contrast-105" />
-            <div class="absolute top-2 left-2 flex gap-1">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${meta.badgeBg}">
-                ${meta.shortLabel}
-              </span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md ${
-                inc.severity === 'critical' ? 'bg-red-500/80 text-white' :
-                inc.severity === 'high' ? 'bg-amber-500/80 text-white' : 'bg-blue-500/80 text-white'
-              }">
-                ${inc.severity}
-              </span>
+          ${hasPhoto ? `
+            <div class="relative overflow-hidden rounded-lg mb-2.5">
+              <img src="${inc.photos[0]}" 
+                   alt="${inc.title}" 
+                   class="w-full h-28 object-cover rounded-lg brightness-90 contrast-105" />
+              <div class="absolute top-2 left-2 flex gap-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${meta.badgeBg}">
+                  ${meta.shortLabel}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md ${
+                  inc.severity === 'critical' ? 'bg-red-500/80 text-white' :
+                  inc.severity === 'high' ? 'bg-amber-500/80 text-white' : 'bg-blue-500/80 text-white'
+                }">
+                  ${inc.severity}
+                </span>
+              </div>
+              <div class="absolute bottom-1 right-2 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-300">
+                ${inc.folioNumber}
+              </div>
             </div>
-            <div class="absolute bottom-1 right-2 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-300">
-              ${inc.folioNumber}
+          ` : `
+            <div class="flex items-center justify-between gap-1 mb-2.5 pt-1">
+              <div class="flex gap-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${meta.badgeBg}">
+                  ${meta.shortLabel}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+                  inc.severity === 'critical' ? 'bg-red-500/80 text-white' :
+                  inc.severity === 'high' ? 'bg-amber-500/80 text-white' : 'bg-blue-500/80 text-white'
+                }">
+                  ${inc.severity}
+                </span>
+              </div>
+              <div class="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-300">
+                ${inc.folioNumber}
+              </div>
             </div>
-          </div>
+          `}
 
           <h4 class="text-sm font-bold text-white line-clamp-2 mb-1 leading-snug">
             ${inc.title}

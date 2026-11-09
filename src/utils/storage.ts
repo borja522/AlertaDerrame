@@ -1,7 +1,7 @@
 import { Incident } from '../types';
 import { INITIAL_MOCK_INCIDENTS } from '../data/mockIncidents';
 
-const STORAGE_KEY = 'ecoalerta_incidents_v1';
+const STORAGE_KEY = 'ecoalerta_incidents_v2';
 
 export function loadStoredIncidents(): Incident[] {
   try {

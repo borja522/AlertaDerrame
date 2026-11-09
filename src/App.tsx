@@ -348,11 +348,20 @@ export function App() {
                           }`}
                         >
                           <div className="flex items-start gap-3">
-                            <img
-                              src={inc.photos[0] || 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=400&q=80'}
-                              alt={inc.title}
-                              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-700/60"
-                            />
+                            {inc.photos && inc.photos.length > 0 ? (
+                              <img
+                                src={inc.photos[0]}
+                                alt={inc.title}
+                                className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-700/60"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 rounded-xl bg-slate-900 border border-slate-700/60 flex flex-col items-center justify-center shrink-0 text-slate-300">
+                                <span className="text-xl">
+                                  {inc.category === 'oil_spill' ? '🛢️' : inc.category === 'deforestation' ? '🌲' : inc.category === 'water_pollution' ? '💧' : inc.category === 'toxic_waste' ? '☣️' : '💨'}
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-semibold mt-0.5">Reporte</span>
+                              </div>
+                            )}
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 mb-1">

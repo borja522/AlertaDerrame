@@ -18,10 +18,7 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
       accuracyMeters: 8
     },
     affectedRadiusMeters: 1400,
-    photos: [
-      'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?auto=format&fit=crop&w=800&q=80'
-    ],
+    photos: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4h ago
     reporter: {
       name: 'Carlos Mendoza',
@@ -76,10 +73,7 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
       accuracyMeters: 15
     },
     affectedRadiusMeters: 2800,
-    photos: [
-      'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1508873696983-2df5703bc20d?auto=format&fit=crop&w=800&q=80'
-    ],
+    photos: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
     reporter: {
       name: 'Guardabosques Comunitario',
@@ -126,9 +120,7 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
       accuracyMeters: 5
     },
     affectedRadiusMeters: 1800,
-    photos: [
-      'https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&w=800&q=80'
-    ],
+    photos: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45m ago
     reporter: {
       name: 'Asociación de Pescadores del Humedal',
@@ -175,9 +167,7 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
       accuracyMeters: 12
     },
     affectedRadiusMeters: 600,
-    photos: [
-      'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80'
-    ],
+    photos: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(),
     reporter: {
       name: 'Comunidad La Fortuna',
@@ -223,9 +213,7 @@ export const INITIAL_MOCK_INCIDENTS: Incident[] = [
       accuracyMeters: 6
     },
     affectedRadiusMeters: 1200,
-    photos: [
-      'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80'
-    ],
+    photos: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
     reporter: {
       name: 'Operador de Muelle Vigilante',

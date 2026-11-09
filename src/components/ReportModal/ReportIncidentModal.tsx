@@ -453,51 +453,26 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
                   {(Object.keys(CATEGORY_METADATA) as IncidentCategory[]).map((catKey) => {
                     const cMeta = CATEGORY_METADATA[catKey];
                     const isSelected = category === catKey;
-                    const catItems = CATEGORY_EVIDENCE_CATALOG[catKey];
                     return (
                       <div
                         key={catKey}
                         onClick={() => handleSelectCategory(catKey)}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-slate-800/95 border-emerald-500 shadow-md ring-1 ring-emerald-500/50'
                             : 'bg-slate-800/40 border-slate-700/60 hover:border-slate-600'
                         }`}
                       >
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm text-white flex items-center gap-2">
-                              <span>{catKey === 'oil_spill' ? '🛢️' : catKey === 'deforestation' ? '🌲' : catKey === 'water_pollution' ? '💧' : catKey === 'toxic_waste' ? '☣️' : '💨'}</span>
-                              {cMeta.label}
-                            </span>
-                            {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
-                          </div>
-                          <p className="text-[11px] text-slate-400 leading-tight mb-2">
-                            {cMeta.description}
-                          </p>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-sm text-white flex items-center gap-2">
+                            <span>{catKey === 'oil_spill' ? '🛢️' : catKey === 'deforestation' ? '🌲' : catKey === 'water_pollution' ? '💧' : catKey === 'toxic_waste' ? '☣️' : '💨'}</span>
+                            {cMeta.label}
+                          </span>
+                          {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
                         </div>
-
-                        {/* Visual evidence thumbnails preview right on the category card */}
-                        <div className="mt-2 pt-2 border-t border-slate-700/50">
-                          <div className="grid grid-cols-4 gap-1 rounded-lg overflow-hidden bg-slate-900/60 p-1 border border-slate-700/40 mb-1.5">
-                            {catItems.map((item) => (
-                              <div key={item.id} className="relative group/thumb h-11 rounded overflow-hidden bg-slate-950">
-                                <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center p-0.5 text-center">
-                                  <span className="text-[8px] text-emerald-300 font-bold leading-none line-clamp-2">{item.title}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex items-center justify-between text-[10px]">
-                            <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                              <span>📸</span> 4 evidencias visuales
-                            </span>
-                            <span className="text-slate-400 truncate max-w-[130px]">
-                              {catItems[0].title}
-                            </span>
-                          </div>
-                        </div>
+                        <p className="text-[11px] text-slate-400 leading-tight">
+                          {cMeta.description}
+                        </p>
                       </div>
                     );
                   })}
