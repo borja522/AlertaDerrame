@@ -34,6 +34,162 @@ interface ReportIncidentModalProps {
   pickedCoords?: { lat: number; lng: number } | null;
 }
 
+// Photographic evidence item definition
+export interface EvidenceCatalogItem {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+}
+
+// Complete photographic evidence catalog per category with explicit descriptions
+export const CATEGORY_EVIDENCE_CATALOG: Record<IncidentCategory, EvidenceCatalogItem[]> = {
+  oil_spill: [
+    {
+      id: 'oil-1',
+      url: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=800&q=80',
+      title: 'Mancha de crudo sobre agua',
+      description: 'Película oleosa negra e iridiscente expandida en superficie fluvial'
+    },
+    {
+      id: 'oil-2',
+      url: 'https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?auto=format&fit=crop&w=800&q=80',
+      title: 'Fuga de tubería / hidrocarburo en suelo',
+      description: 'Saturación espesa de crudo en vegetación y lodo'
+    },
+    {
+      id: 'oil-3',
+      url: 'https://images.unsplash.com/photo-1628126235206-5260b9ea6441?auto=format&fit=crop&w=800&q=80',
+      title: 'Barrera de contención flotante',
+      description: 'Cordón oleofílico absorbente intentando frenar el avance aguas abajo'
+    },
+    {
+      id: 'oil-4',
+      url: 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80',
+      title: 'Sedimento negro en la ribera',
+      description: 'Acumulación de alquitrán y crudo en la orilla afectando fauna'
+    }
+  ],
+  deforestation: [
+    {
+      id: 'def-1',
+      url: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
+      title: 'Tala masiva y troncos cortados',
+      description: 'Árboles nativos derribados con motosierra apilados para transporte'
+    },
+    {
+      id: 'def-2',
+      url: 'https://images.unsplash.com/photo-1508873696983-2df5703bc20d?auto=format&fit=crop&w=800&q=80',
+      title: 'Claro abierto en reserva forestal',
+      description: 'Destrucción de cobertura vegetal para expansión agropecuaria'
+    },
+    {
+      id: 'def-3',
+      url: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=800&q=80',
+      title: 'Trocha y maquinaria pesada',
+      description: 'Bulldozers abriendo caminos no autorizados en selva protegida'
+    },
+    {
+      id: 'def-4',
+      url: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
+      title: 'Sotobosque arrasado',
+      description: 'Pérdida de biodiversidad y degradación severa del suelo forestal'
+    }
+  ],
+  water_pollution: [
+    {
+      id: 'wat-1',
+      url: 'https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&w=800&q=80',
+      title: 'Vertimiento industrial turbio',
+      description: 'Descarga no tratada cambiando la coloración natural de la fuente hídrica'
+    },
+    {
+      id: 'wat-2',
+      url: 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80',
+      title: 'Espuma química en ciénaga',
+      description: 'Formación densa blanquecina por surfactantes y detergentes industriales'
+    },
+    {
+      id: 'wat-3',
+      url: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80',
+      title: 'Agua estancada con toxicidad',
+      description: 'Alteración de oxígeno disuelto con riesgo para consumo humano y peces'
+    },
+    {
+      id: 'wat-4',
+      url: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
+      title: 'Lixiviados y residuos en caño',
+      description: 'Filtración de contaminantes líquidos directamente al lecho del río'
+    }
+  ],
+  toxic_waste: [
+    {
+      id: 'tox-1',
+      url: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80',
+      title: 'Canecas industriales de 55 galones',
+      description: 'Tambores metálicos corroídos con solventes y residuos químicos'
+    },
+    {
+      id: 'tox-2',
+      url: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?auto=format&fit=crop&w=800&q=80',
+      title: 'Botadero clandestino a cielo abierto',
+      description: 'Disposición ilegal de materiales inflamables y corrosivos sin control'
+    },
+    {
+      id: 'tox-3',
+      url: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
+      title: 'Lodos y desechos peligrosos',
+      description: 'Material viscoso residual abandonado sobre suelo permeable'
+    },
+    {
+      id: 'tox-4',
+      url: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=800&q=80',
+      title: 'Contenedores oxidados abandonados',
+      description: 'Recipientes químicos expuestos a la intemperie en zona rural'
+    }
+  ],
+  air_pollution: [
+    {
+      id: 'air-1',
+      url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80',
+      title: 'Emisiones de chimenea industrial',
+      description: 'Expulsión continua de humo oscuro con partículas tóxicas'
+    },
+    {
+      id: 'air-2',
+      url: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=800&q=80',
+      title: 'Incendio forestal y nube de humo',
+      description: 'Frente de fuego no controlado saturando la atmósfera de gases'
+    },
+    {
+      id: 'air-3',
+      url: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80',
+      title: 'Esmog denso sobre el territorio',
+      description: 'Concentración crítica de material particulado afectando la respiración'
+    },
+    {
+      id: 'air-4',
+      url: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=800&q=80',
+      title: 'Quema clandestina de residuos',
+      description: 'Combustión al aire libre de plásticos y materiales con gases tóxicos'
+    }
+  ]
+};
+
+// Helper function to extract metadata for any photo url
+const findPhotoDetails = (url: string) => {
+  for (const cat of Object.keys(CATEGORY_EVIDENCE_CATALOG) as IncidentCategory[]) {
+    const item = CATEGORY_EVIDENCE_CATALOG[cat].find((p) => p.url === url);
+    if (item) return item;
+  }
+  return {
+    id: 'custom',
+    url,
+    title: 'Fotografía Anexada',
+    description: 'Documentación gráfica aportada en el reporte'
+  };
+};
+
 export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
   isOpen,
   onClose,
@@ -50,9 +206,9 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
   const [severity, setSeverity] = useState<IncidentSeverity>('critical');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [photos, setPhotos] = useState<string[]>([
-    'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=800&q=80'
-  ]);
+  const [photos, setPhotos] = useState<string[]>(
+    CATEGORY_EVIDENCE_CATALOG.oil_spill.map((p) => p.url)
+  );
   const [lat, setLat] = useState<number>(pickedCoords?.lat || currentMapCoords?.lat || 7.0651);
   const [lng, setLng] = useState<number>(pickedCoords?.lng || currentMapCoords?.lng || -73.7915);
   const [address, setAddress] = useState('Sector Ribereño Km 12');
@@ -73,6 +229,14 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
 
   const [isLocating, setIsLocating] = useState(false);
 
+  // Auto-sync all 4 photos with category when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setStep(1);
+      setPhotos(CATEGORY_EVIDENCE_CATALOG[category].map((p) => p.url));
+    }
+  }, [isOpen, category]);
+
   // Sync picked coordinates when changed from parent
   React.useEffect(() => {
     if (pickedCoords) {
@@ -85,6 +249,33 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
 
   const authority = getAuthorityForCategory(category);
   const activeMeta = CATEGORY_METADATA[category];
+
+  // Category change handler that auto-assigns all matching evidence photos
+  const handleSelectCategory = (newCategory: IncidentCategory) => {
+    setCategory(newCategory);
+    setPhotos(CATEGORY_EVIDENCE_CATALOG[newCategory].map((p) => p.url));
+  };
+
+  const handleProceedToStep2 = () => {
+    if (photos.length === 0) {
+      setPhotos(CATEGORY_EVIDENCE_CATALOG[category].map((p) => p.url));
+    }
+    setStep(2);
+  };
+
+  // Toggle or add photo from catalog
+  const toggleCatalogPhoto = (url: string) => {
+    if (photos.includes(url)) {
+      setPhotos(photos.filter((p) => p !== url));
+    } else {
+      setPhotos([...photos, url]);
+    }
+  };
+
+  const handleAddSamplePhotos = () => {
+    const samples = CATEGORY_EVIDENCE_CATALOG[category].map((p) => p.url);
+    setPhotos(samples);
+  };
 
   // Geolocation trigger
   const handleDetectGPS = () => {
@@ -99,38 +290,12 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
         setLat(pos.coords.latitude);
         setLng(pos.coords.longitude);
       },
-      (err) => {
+      (_err) => {
         setIsLocating(false);
         alert('No se pudo acceder a la ubicación GPS. Puedes ingresar las coordenadas manualmente o fijar en el mapa.');
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
-  };
-
-  // Photo simulation samples
-  const sampleEvidence = {
-    oil_spill: [
-      'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?auto=format&fit=crop&w=800&q=80'
-    ],
-    deforestation: [
-      'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1508873696983-2df5703bc20d?auto=format&fit=crop&w=800&q=80'
-    ],
-    water_pollution: [
-      'https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&w=800&q=80'
-    ],
-    toxic_waste: [
-      'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80'
-    ],
-    air_pollution: [
-      'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80'
-    ]
-  };
-
-  const handleAddSamplePhotos = () => {
-    const samples = sampleEvidence[category] || sampleEvidence.oil_spill;
-    setPhotos([...photos, ...samples]);
   };
 
   // Handle file upload
@@ -288,26 +453,51 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
                   {(Object.keys(CATEGORY_METADATA) as IncidentCategory[]).map((catKey) => {
                     const cMeta = CATEGORY_METADATA[catKey];
                     const isSelected = category === catKey;
+                    const catItems = CATEGORY_EVIDENCE_CATALOG[catKey];
                     return (
                       <div
                         key={catKey}
-                        onClick={() => setCategory(catKey)}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                        onClick={() => handleSelectCategory(catKey)}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                           isSelected
-                            ? 'bg-slate-800/90 border-emerald-500 shadow-md ring-1 ring-emerald-500/50'
+                            ? 'bg-slate-800/95 border-emerald-500 shadow-md ring-1 ring-emerald-500/50'
                             : 'bg-slate-800/40 border-slate-700/60 hover:border-slate-600'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-sm text-white flex items-center gap-2">
-                            <span>{catKey === 'oil_spill' ? '🛢️' : catKey === 'deforestation' ? '🌲' : catKey === 'water_pollution' ? '💧' : catKey === 'toxic_waste' ? '☣️' : '💨'}</span>
-                            {cMeta.label}
-                          </span>
-                          {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-sm text-white flex items-center gap-2">
+                              <span>{catKey === 'oil_spill' ? '🛢️' : catKey === 'deforestation' ? '🌲' : catKey === 'water_pollution' ? '💧' : catKey === 'toxic_waste' ? '☣️' : '💨'}</span>
+                              {cMeta.label}
+                            </span>
+                            {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
+                          </div>
+                          <p className="text-[11px] text-slate-400 leading-tight mb-2">
+                            {cMeta.description}
+                          </p>
                         </div>
-                        <p className="text-[11px] text-slate-400 leading-tight">
-                          {cMeta.description}
-                        </p>
+
+                        {/* Visual evidence thumbnails preview right on the category card */}
+                        <div className="mt-2 pt-2 border-t border-slate-700/50">
+                          <div className="grid grid-cols-4 gap-1 rounded-lg overflow-hidden bg-slate-900/60 p-1 border border-slate-700/40 mb-1.5">
+                            {catItems.map((item) => (
+                              <div key={item.id} className="relative group/thumb h-11 rounded overflow-hidden bg-slate-950">
+                                <img src={item.url} alt={item.title} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center p-0.5 text-center">
+                                  <span className="text-[8px] text-emerald-300 font-bold leading-none line-clamp-2">{item.title}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                              <span>📸</span> 4 evidencias visuales
+                            </span>
+                            <span className="text-slate-400 truncate max-w-[130px]">
+                              {catItems[0].title}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
@@ -372,7 +562,7 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
               <div className="flex justify-end pt-2">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={handleProceedToStep2}
                   className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all"
                 >
                   <span>Continuar a Evidencia Fotográfica</span>
@@ -388,7 +578,7 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-                    Evidencia Fotográfica del Incidente ({photos.length})
+                    Evidencia Fotográfica del Incidente ({photos.length} seleccionadas)
                   </label>
                   <button
                     type="button"
@@ -396,28 +586,68 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
                     className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-800/40"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Cargar Fotos de Demostración</span>
+                    <span>Restablecer todas ({CATEGORY_EVIDENCE_CATALOG[category].length})</span>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-                  {photos.map((p, idx) => (
-                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 h-28 bg-slate-800">
-                      <img src={p} alt="Evidencia" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-1.5 right-1.5 p-1 bg-red-600/90 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                {/* Explicit feedback banner showing problem title & explanation */}
+                <div className="mb-4 px-3.5 py-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs shadow-md">
+                  <div className="flex items-center gap-2.5 text-emerald-300 font-medium">
+                    <span className="text-xl">
+                      {category === 'oil_spill' ? '🛢️' : category === 'deforestation' ? '🌲' : category === 'water_pollution' ? '💧' : category === 'toxic_waste' ? '☣️' : '💨'}
+                    </span>
+                    <div>
+                      <div className="text-white font-bold leading-tight">
+                        Evidencias correspondientes a: {activeMeta.label}
+                      </div>
+                      <div className="text-[11px] text-slate-300 mt-0.5">
+                        Cada fotografía detalla un punto crítico del incidente para fundamentar la respuesta de las autoridades.
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-500/30 font-semibold whitespace-nowrap self-end sm:self-center">
+                    Auto-asignado
+                  </span>
+                </div>
+
+                {/* Grid of detailed photo cards with title, description and delete */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                  {photos.map((p, idx) => {
+                    const info = findPhotoDetails(p);
+                    return (
+                      <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 bg-slate-850 flex flex-col shadow-lg">
+                        <div className="relative h-40 w-full bg-slate-900 overflow-hidden">
+                          <img src={p} alt={info.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm text-[10px] font-bold text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>Evidencia #{idx + 1}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(idx)}
+                            className="absolute top-2 right-2 p-1.5 bg-red-600/90 hover:bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                            title="Quitar esta foto"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="p-3 bg-slate-800/90 border-t border-slate-700/60">
+                          <div className="font-bold text-xs text-white leading-tight">
+                            {info.title}
+                          </div>
+                          <div className="text-[10px] text-slate-300 leading-tight mt-1">
+                            {info.description}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
 
                   {/* Upload button card */}
-                  <label className="border-2 border-dashed border-slate-700 hover:border-emerald-500/80 rounded-xl flex flex-col items-center justify-center p-4 cursor-pointer text-slate-400 hover:text-emerald-400 transition-colors h-28 bg-slate-800/30">
-                    <Upload className="w-6 h-6 mb-1" />
-                    <span className="text-[11px] font-semibold text-center">Subir Foto Real</span>
+                  <label className="border-2 border-dashed border-slate-700 hover:border-emerald-500/80 rounded-xl flex flex-col items-center justify-center p-4 cursor-pointer text-slate-400 hover:text-emerald-400 transition-colors min-h-[160px] bg-slate-800/30">
+                    <Upload className="w-7 h-7 mb-1.5 text-emerald-500" />
+                    <span className="text-xs font-bold text-white">Subir Foto Real Adicional</span>
+                    <span className="text-[10px] text-slate-400 text-center mt-1">Anexa pruebas desde tu celular o cámara</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -427,6 +657,49 @@ export const ReportIncidentModal: React.FC<ReportIncidentModalProps> = ({
                     />
                   </label>
                 </div>
+
+                {/* Available catalog selector to toggle/swap photos with 1 click */}
+                <div className="p-3 bg-slate-800/40 rounded-xl border border-slate-700/60 mb-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      Catálogo Completo de Evidencias ({activeMeta.label})
+                    </span>
+                    <span className="text-[10px] text-slate-400">Toca para agregar/quitar</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {CATEGORY_EVIDENCE_CATALOG[category].map((catItem) => {
+                      const isAttached = photos.includes(catItem.url);
+                      return (
+                        <button
+                          type="button"
+                          key={catItem.id}
+                          onClick={() => toggleCatalogPhoto(catItem.url)}
+                          className={`p-1.5 rounded-lg border text-left flex flex-col transition-all cursor-pointer ${
+                            isAttached
+                              ? 'border-emerald-500/80 bg-emerald-950/40 ring-1 ring-emerald-500/30'
+                              : 'border-slate-700/60 bg-slate-900/60 hover:border-slate-500 opacity-75 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="relative h-16 w-full rounded overflow-hidden mb-1.5">
+                            <img src={catItem.url} alt={catItem.title} className="w-full h-full object-cover" />
+                            {isAttached && (
+                              <div className="absolute top-1 right-1 bg-emerald-500 text-white p-0.5 rounded-full shadow">
+                                <Check className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-bold text-white truncate leading-tight">
+                            {catItem.title}
+                          </span>
+                          <span className={`text-[9px] mt-0.5 font-semibold ${isAttached ? 'text-emerald-400' : 'text-slate-400'}`}>
+                            {isAttached ? '✓ Adjuntada' : '+ Adjuntar'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <p className="text-[11px] text-slate-400">
                   Las fotografías anexadas incluirán metadatos de hora y georreferenciación para validación pericial de las autoridades.
                 </p>
