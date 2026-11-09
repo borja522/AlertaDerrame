@@ -1,4 +1,4 @@
-import { CoordinatesDMS, LocationInfo } from '../types';
+import type { CoordinatesDMS, LocationInfo } from '../types/index.ts';
 
 /**
  * Calculates the great-circle distance between two coordinates using the Haversine formula.

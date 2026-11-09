@@ -1,5 +1,5 @@
-import { IncidentCategory, IncidentSeverity } from '../types';
-import { isValidCoordinate } from './geo';
+import type { IncidentCategory, IncidentSeverity } from '../types/index.ts';
+import { isValidCoordinate } from './geo.ts';
 
 export interface ValidationResult {
   isValid: boolean;
