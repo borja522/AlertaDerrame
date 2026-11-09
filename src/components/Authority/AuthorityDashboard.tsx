@@ -3,25 +3,20 @@ import { Incident, IncidentCategory, IncidentSeverity, IncidentStatus } from '..
 import { CATEGORY_METADATA } from '../../data/authorities';
 import { 
   AlertOctagon, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
   Download, 
   Droplet, 
   Eye, 
   Filter, 
-  Flame, 
-  Layers, 
+  FileJson,
   MapPin, 
-  Radio, 
   Search, 
   ShieldAlert, 
-  Sparkles, 
   TreePine, 
-  Volume2, 
-  Waves 
+  Volume2 
 } from 'lucide-react';
 import { playEmergencySirenSound } from '../../utils/audio';
+import { exportIncidentsToCSV, exportIncidentsToJSON } from '../../utils/export';
+import { formatRadius } from '../../utils/formatters';
 
 interface AuthorityDashboardProps {
   incidents: Incident[];
@@ -43,11 +38,13 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
 
   // Filtered list
   const filteredIncidents = incidents.filter((inc) => {
+    const term = searchTerm.toLowerCase();
     const matchesSearch = 
-      inc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      inc.folioNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (inc.location.municipality && inc.location.municipality.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (inc.location.address && inc.location.address.toLowerCase().includes(searchTerm.toLowerCase()));
+      inc.title.toLowerCase().includes(term) ||
+      inc.folioNumber.toLowerCase().includes(term) ||
+      (inc.location.municipality && inc.location.municipality.toLowerCase().includes(term)) ||
+      (inc.location.department && inc.location.department.toLowerCase().includes(term)) ||
+      (inc.location.address && inc.location.address.toLowerCase().includes(term));
 
     const matchesCat = filterCategory === 'all' || inc.category === filterCategory;
     const matchesSev = filterSeverity === 'all' || inc.severity === filterSeverity;
@@ -70,30 +67,12 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
     resolved: { label: 'Remediado', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' }
   };
 
-  // Export to CSV
   const handleExportCSV = () => {
-    const headers = ['Folio', 'Titulo', 'Categoria', 'Severidad', 'Estado', 'Municipio', 'Latitud', 'Longitud', 'Radio_Metros', 'Fecha'];
-    const rows = filteredIncidents.map(inc => [
-      inc.folioNumber,
-      `"${inc.title.replace(/"/g, '""')}"`,
-      inc.category,
-      inc.severity,
-      inc.status,
-      `"${inc.location.municipality || ''}"`,
-      inc.location.lat,
-      inc.location.lng,
-      inc.affectedRadiusMeters,
-      inc.createdAt
-    ]);
+    exportIncidentsToCSV(filteredIncidents, 'ecoalerta_autoridad_reportes');
+  };
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `EcoAlerta_Reportes_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportJSON = () => {
+    exportIncidentsToJSON(filteredIncidents, 'ecoalerta_autoridad_dataset');
   };
 
   return (
@@ -183,9 +162,19 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
             <button
               onClick={handleExportCSV}
               className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all shadow"
+              title="Descargar reporte en formato Excel CSV"
             >
               <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Exportar CSV</span>
+              <span>CSV</span>
+            </button>
+
+            <button
+              onClick={handleExportJSON}
+              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all shadow"
+              title="Descargar dataset en formato JSON"
+            >
+              <FileJson className="w-3.5 h-3.5 text-cyan-400" />
+              <span>JSON</span>
             </button>
           </div>
         </div>
@@ -305,7 +294,7 @@ export const AuthorityDashboard: React.FC<AuthorityDashboardProps> = ({
                           <span className="truncate">{inc.location.municipality || 'Barrancabermeja'}, {inc.location.department}</span>
                         </span>
                         <span className="text-slate-500">•</span>
-                        <span>Radio: <strong className="text-slate-300 font-mono">{(inc.affectedRadiusMeters / 1000).toFixed(1)} km</strong></span>
+                        <span>Radio: <strong className="text-slate-300 font-mono">{formatRadius(inc.affectedRadiusMeters)}</strong></span>
                         <span className="text-slate-500">•</span>
                         <span>Autoridad: <strong className="text-sky-400">{inc.authorityAssigned.agencyName.split('/')[0]}</strong></span>
                       </div>
