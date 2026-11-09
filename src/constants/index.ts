@@ -1,4 +1,4 @@
-import { IncidentCategory, IncidentSeverity, IncidentSortOption, IncidentStatus } from '../types';
+import { IncidentSeverity, IncidentSortOption, IncidentStatus } from '../types';
 
 export const APP_CONFIG = {
   APP_NAME: 'EcoAlerta',
@@ -86,4 +86,3 @@ export const COLOMBIAN_DEPARTMENTS: string[] = [
   'Vichada',
   'San Andrés y Providencia'
 ];
-
