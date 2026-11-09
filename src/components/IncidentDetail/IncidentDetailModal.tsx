@@ -318,6 +318,7 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
           </div>
         </div>
 
+        
         {/* Footer Actions */}
         <div className="p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3">
           <button
@@ -328,18 +329,41 @@ export const IncidentDetailModal: React.FC<IncidentDetailModalProps> = ({
             <span>Descargar Ficha Técnica (.txt)</span>
           </button>
 
+          <div className="text-xs text-slate-400">
+            Protocolo de Alerta Temprana • Ley Ambiental & Gestión del Riesgo
+          </div>
+
           <div className="flex items-center gap-2">
+            {incident.status !== 'resolved' && (
+              <button
+                type="button"
+                onClick={() => {
+                  onUpdateStatus?.(
+                    incident.id,
+                    'resolved',
+                    'Incidente finalizado: problema solucionado.'
+                  );
+                  onClose();
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-colors"
+              >
+                <CheckCircle2 className="w-4 h-4 inline mr-1" />
+                Finalizado
+              </button>
+            )}
+
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-colors"
             >
               Cerrar Expediente
             </button>
-          </div>
+           </div>
         </div>
-
       </div>
 
+      
       {/* Lightbox for single photo view */}
       {selectedPhoto && (
         <div

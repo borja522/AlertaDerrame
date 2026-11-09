@@ -14,6 +14,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { auditService } from './services/auditService';
 import { formatRadius } from './utils/formatters';
 import { SORT_OPTIONS, APP_CONFIG } from './constants';
+import { playEmergencySirenSound } from './utils/audio';
 import { 
   ArrowUpDown,
   ChevronRight, 
@@ -94,6 +95,10 @@ export function App() {
   // Wrap incident creation with audio chime, audit & toast
   const handleCreateIncident = useCallback((newIncident: Incident) => {
     createIncident(newIncident);
+
+    if (newIncident.severity === 'critical') {
+       playEmergencySirenSound();
+    }
     auditService.log('incident_created', `Alerta #${newIncident.folioNumber}: ${newIncident.title}`, newIncident.folioNumber);
     setIsPickingLocation(false);
     setPickedCoords(null);

@@ -41,7 +41,7 @@ const handleClearFilters = () => {
   setFilterSeverity('all');
   setFilterStatus('all');
 };
-  // Filtered list
+   // Filtered list
   const filteredIncidents = incidents.filter((inc) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = 
@@ -51,9 +51,16 @@ const handleClearFilters = () => {
       (inc.location.department && inc.location.department.toLowerCase().includes(term)) ||
       (inc.location.address && inc.location.address.toLowerCase().includes(term));
 
-    const matchesCat = filterCategory === 'all' || inc.category === filterCategory;
-    const matchesSev = filterSeverity === 'all' || inc.severity === filterSeverity;
-    const matchesStat = filterStatus === 'all' || inc.status === filterStatus;
+    const matchesCat =
+      filterCategory === 'all' || inc.category === filterCategory;
+
+    const matchesSev =
+      filterSeverity === 'all' || inc.severity === filterSeverity;
+
+    const matchesStat =
+      filterStatus === 'all'
+        ? inc.status !== 'resolved'
+        : inc.status === filterStatus;
 
     return matchesSearch && matchesCat && matchesSev && matchesStat;
   });
@@ -223,7 +230,7 @@ const handleClearFilters = () => {
             onChange={(e) => setFilterStatus(e.target.value as IncidentStatus | 'all')}
             className="bg-slate-900 border border-slate-700/80 text-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500"
           >
-            <option value="all">Todos los Estados</option>
+            <option value="all">Todos los estados activos</option>
             <option value="reported">Reportado</option>
             <option value="triaged">Triagado</option>
             <option value="in_investigation">En Inspección</option>
