@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import type { Incident, IncidentStatus } from './types';
 import { Navbar } from './components/Navigation/Navbar';
+import { TopEmergencySlider } from './components/Navigation/TopEmergencySlider';
 import { IncidentMap } from './components/Map/IncidentMap';
 import { IncidentDetailModal } from './components/IncidentDetail/IncidentDetailModal';
 import { ReportIncidentModal } from './components/ReportModal/ReportIncidentModal';
@@ -145,17 +146,17 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* Toast notification */}
+      {/* Toast notification with smooth GPU animation */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-60 animate-bounce">
+        <div className="fixed bottom-6 right-6 z-60 animate-toast">
           <div className="glass-panel px-4 py-3 rounded-2xl border border-emerald-500/50 shadow-2xl flex items-center gap-3 text-xs font-bold text-emerald-300">
-            <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <Radio className="w-4 h-4 text-emerald-400 animate-beacon" />
             <span>{toastMessage}</span>
           </div>
         </div>
       )}
 
-      {/* Main Navigation */}
+      {/* Main Navigation with Smooth Sliding Tab Pill */}
       <Navbar
         currentView={currentView}
         onViewChange={(v) => {
@@ -168,37 +169,27 @@ export function App() {
         onToggleSound={toggleMute}
       />
 
+      {/* Top Emergency Carousel & Real-Time Alerts Slider */}
+      <TopEmergencySlider
+        incidents={incidents}
+        onSelectIncident={(inc) => {
+          setSelectedIncident(inc);
+          setCurrentView('map');
+        }}
+        onLocateOnMap={(inc) => {
+          setSelectedIncident(inc);
+          setCurrentView('map');
+        }}
+        onOpenDetail={(inc) => {
+          setSelectedIncident(inc);
+        }}
+      />
+
       {/* Offline Connectivity Notification Banner */}
       {!networkStatus.isOnline && (
-        <div className="bg-amber-950/80 border-b border-amber-500/40 px-4 py-1.5 text-xs text-amber-300 flex items-center justify-center gap-2">
+        <div className="bg-amber-950/80 border-b border-amber-500/40 px-4 py-1.5 text-xs text-amber-300 flex items-center justify-center gap-2 animate-slideDown">
           <WifiOff className="w-3.5 h-3.5 text-amber-400" />
           <span>Modo sin conexión: los cambios y reportes se conservan en la memoria local.</span>
-        </div>
-      )}
-
-      {/* Critical Spill Emergency Notification Banner */}
-      {criticalCount > 0 && (
-        <div className="bg-gradient-to-r from-red-950 via-red-900/80 to-slate-950 border-b border-red-500/40 px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-red-200">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2.5 w-2.5 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-              </span>
-              <span className="font-bold uppercase tracking-wider text-white">Emergencia Ambiental Activa:</span>
-              <span className="hidden sm:inline">Hay {criticalCount} reporte(s) crítico(s) de derrames o afectación en fuentes hídricas bajo contención.</span>
-            </div>
-            <button
-              onClick={() => {
-                setSeverityFilter('critical');
-                setCurrentView('map');
-              }}
-              className="text-[11px] font-bold text-red-300 hover:text-white underline underline-offset-2 flex items-center gap-1"
-            >
-              <span>Ver focos críticos en mapa</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
       )}
 
@@ -228,67 +219,87 @@ export function App() {
         {currentView === 'map' && (
           <div className="space-y-6">
             
-            {/* Top Quick Filter Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 glass-panel p-3.5 rounded-2xl border border-slate-800">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 flex items-center gap-1 mr-1">
+            {/* Top Quick Filter Slider / Selector */}
+            <div className="flex flex-wrap items-center justify-between gap-3 glass-panel p-3 sm:p-3.5 rounded-2xl border border-slate-800 shadow-lg">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0 w-full sm:w-auto">
+                <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5 mr-1 shrink-0">
                   <Filter className="w-3.5 h-3.5 text-emerald-400" />
-                  Filtrar Mapa:
+                  <span className="hidden xs:inline">Filtrar:</span>
                 </span>
 
                 <button
                   onClick={() => setCategoryFilter('all')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 flex items-center gap-1.5 active:scale-95 ${
                     categoryFilter === 'all'
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'bg-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-950/50 border border-emerald-400/30'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800/80'
                   }`}
                 >
-                  Todos ({incidents.length})
+                  <span>Todos</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    categoryFilter === 'all' ? 'bg-white/20 text-white font-extrabold' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {incidents.length}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => setCategoryFilter('oil_spill')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 flex items-center gap-1.5 active:scale-95 ${
                     categoryFilter === 'oil_spill'
-                      ? 'bg-amber-600 text-white shadow'
-                      : 'bg-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white shadow-md shadow-amber-950/50 border border-amber-400/30'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800/80'
                   }`}
                 >
                   <span>🛢️</span>
-                  <span>Derrames Hidrocarburos</span>
+                  <span>Derrames</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    categoryFilter === 'oil_spill' ? 'bg-white/20 text-white font-extrabold' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {incidents.filter(i => i.category === 'oil_spill').length}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => setCategoryFilter('deforestation')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 flex items-center gap-1.5 active:scale-95 ${
                     categoryFilter === 'deforestation'
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'bg-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-emerald-700 to-green-600 text-white shadow-md shadow-emerald-950/50 border border-emerald-400/30'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800/80'
                   }`}
                 >
                   <span>🌲</span>
                   <span>Deforestación</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    categoryFilter === 'deforestation' ? 'bg-white/20 text-white font-extrabold' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {incidents.filter(i => i.category === 'deforestation').length}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => setCategoryFilter('water_pollution')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 flex items-center gap-1.5 active:scale-95 ${
                     categoryFilter === 'water_pollution'
-                      ? 'bg-cyan-600 text-white shadow'
-                      : 'bg-slate-900 text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-cyan-600 to-sky-600 text-white shadow-md shadow-cyan-950/50 border border-cyan-400/30'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800/80'
                   }`}
                 >
                   <span>💧</span>
                   <span>Agua / Vertimientos</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    categoryFilter === 'water_pollution' ? 'bg-white/20 text-white font-extrabold' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {incidents.filter(i => i.category === 'water_pollution').length}
+                  </span>
                 </button>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto shrink-0">
                 <button
                   onClick={exportCSV}
                   title="Exportar reportes a CSV"
-                  className="p-2 text-slate-400 hover:text-slate-200 bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors border border-slate-800 flex items-center gap-1 text-xs"
+                  className="p-2 text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-slate-800 flex items-center gap-1 text-xs"
                 >
                   <Download className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="hidden sm:inline">Exportar</span>
@@ -297,7 +308,7 @@ export function App() {
                 <button
                   onClick={handleResetDemo}
                   title="Restaurar datos de prueba"
-                  className="p-2 text-slate-400 hover:text-slate-200 bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors border border-slate-800 flex items-center gap-1 text-xs"
+                  className="p-2 text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 border border-slate-800 flex items-center gap-1 text-xs"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Demo Base</span>
@@ -400,10 +411,10 @@ export function App() {
                         <div
                           key={inc.id}
                           onClick={() => setSelectedIncident(inc)}
-                          className={`glass-panel p-3.5 rounded-2xl border transition-all cursor-pointer hover:border-emerald-500/60 ${
+                          className={`glass-panel p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer hover:border-emerald-500/60 hover:scale-[1.01] active:scale-[0.99] ${
                             isSelected
-                              ? 'border-emerald-500 bg-emerald-950/20 shadow-lg'
-                              : 'border-slate-800'
+                              ? 'border-emerald-500 bg-emerald-950/25 shadow-lg shadow-emerald-950/40'
+                              : 'border-slate-800 hover:bg-slate-900/60'
                           }`}
                         >
                           <div className="flex items-start gap-3">
