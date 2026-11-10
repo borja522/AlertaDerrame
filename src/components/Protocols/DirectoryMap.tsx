@@ -39,18 +39,18 @@ export const DirectoryMap: React.FC<DirectoryMapProps> = ({
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const baseTileLayerRef = useRef<L.TileLayer | null>(null);
 
-  const [mapStyle, setMapStyle] = useState<'carto' | 'satellite' | 'osm'>('carto');
+  const [mapStyle, setMapStyle] = useState<'osm' | 'satellite' | 'topo'>('osm');
 
   const tileURLs = {
-    carto: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    topo: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
   };
 
   const tileAttributions = {
-    carto: '&copy; CARTO &copy; OpenStreetMap',
+    osm: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     satellite: 'Tiles &copy; Esri World Imagery',
-    osm: '&copy; OpenStreetMap contributors'
+    topo: 'Tiles &copy; Esri World Topo Map'
   };
 
   // Initialize Map strictly on mount
@@ -198,12 +198,12 @@ export const DirectoryMap: React.FC<DirectoryMapProps> = ({
       {/* Top Map Layer Selector Controls */}
       <div className="absolute top-4 left-4 z-10 flex flex-wrap items-center gap-1.5 glass-panel p-1.5 rounded-xl border border-slate-800/80 shadow-lg">
         <button
-          onClick={() => setMapStyle('carto')}
+          onClick={() => setMapStyle('osm')}
           className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-            mapStyle === 'carto' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
+            mapStyle === 'osm' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
           }`}
         >
-          Carto Voyager
+          Callejero OSM
         </button>
         <button
           onClick={() => setMapStyle('satellite')}
@@ -214,12 +214,12 @@ export const DirectoryMap: React.FC<DirectoryMapProps> = ({
           Satélite HD
         </button>
         <button
-          onClick={() => setMapStyle('osm')}
+          onClick={() => setMapStyle('topo')}
           className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-            mapStyle === 'osm' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
+            mapStyle === 'topo' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
           }`}
         >
-          Callejero OSM
+          Topográfico
         </button>
       </div>
 
